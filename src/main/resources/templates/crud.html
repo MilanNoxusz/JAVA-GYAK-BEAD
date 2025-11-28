@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Zoé Cukrászdája - CRUD">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoé Cukrászdája - Süti Kezelő</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/flaticon.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/barfiller.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/magnific-popup.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/nice-select.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+</head>
+
+<body>
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__logo">
+        <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+    </div>
+    <div id="mobile-menu-wrap"></div>
+</div>
+
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <ul>
+                                <li sec:authorize="isAuthenticated()">Szia, <span sec:authentication="principal.fullName" style="font-weight:bold; color: orange;">User</span>!</li>
+                            </ul>
+                        </div>
+                        <div class="header__logo">
+                            <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a th:href="@{/}">Főoldal</a></li>
+                        <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
+                        <li><a href="#">Menü</a></li>
+                        <li><a th:href="@{/diagram}">Diagram</a></li>
+                        <li class="active"><a th:href="@{/crud}">CRUD</a></li>
+                        <li><a href="#">Kapcsolat</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="section-title">
+                    <span>Adminisztráció</span>
+                    <h2>Sütemények Kezelése</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-12 text-right">
+                <a th:href="@{/crud/uj}" class="primary-btn">Új Sütemény Hozzáadása</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="cart__table">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Név</th>
+                            <th>Típus</th>
+                            <th>Díjazott</th>
+                            <th>Műveletek</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="suti : ${sutik}">
+                            <td th:text="${suti.id}">1</td>
+                            <td th:text="${suti.nev}">Dobostorta</td>
+                            <td th:text="${suti.tipus}">Torta</td>
+                            <td>
+                                <span th:if="${suti.dijazott}" class="text-success"><i class="fa fa-check-circle"></i> Igen</span>
+                                <span th:unless="${suti.dijazott}" class="text-muted"><i class="fa fa-times-circle"></i> Nem</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/crud/szerkeszt/{id}(id=${suti.id})}" class="btn btn-warning btn-sm">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a th:href="@{/crud/torles/{id}(id=${suti.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Biztosan törölni szeretnéd?');">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer set-bg" th:attr="data-setbg=@{/img/footer-bg.jpg}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="footer__logo">
+                    <a href="#"><img th:src="@{/img/footer-logo.png}" alt=""></a>
+                </div>
+                <p class="text-white mt-3">Zoé Cukrászdája CRUD felület</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.nice-select.min.js}"></script>
+<script th:src="@{/js/jquery.barfiller.js}"></script>
+<script th:src="@{/js/jquery.magnific-popup.min.js}"></script>
+<script th:src="@{/js/jquery.slicknav.js}"></script>
+<script th:src="@{/js/owl.carousel.min.js}"></script>
+<script th:src="@{/js/jquery.nicescroll.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
