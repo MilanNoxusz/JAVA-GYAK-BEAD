@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Zoé Cukrászdája - Kínálat">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adatbázis | Zoé Cukrászdája</title>
+
+    <!-- Stílusok -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/flaticon.css}" type="text/css">
+</head>
+
+<body>
+<!-- Header -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <ul>
+                                <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Belépés</a></li>
+                                <li sec:authorize="isAnonymous()"><a th:href="@{/register}">Regisztrálás</a></li>
+                                <li sec:authorize="isAuthenticated()">Szia, <span sec:authentication="principal.fullName">Zoé</span>!</li>
+                                <li sec:authorize="isAuthenticated()">
+                                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                                        <button type="submit" style="background:none; border:none; color:black; cursor:pointer;">Kilépés</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="header__logo">
+                            <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+                        </div>
+                        <div class="header__top__right"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a th:href="@{/}">Főoldal</a></li>
+                        <li class="active"><a th:href="@{/adatbazis}">Adatbázis</a></li>
+                        <li><a href="#">Menü</a></li>
+                        <li><a href="#">Oldalak</a>
+                            <ul class="dropdown">
+                                <li sec:authorize="hasAnyRole('USER', 'ADMIN')">
+                                    <a th:href="@{/messages}">Üzenetek</a>
+                                </li>
+                                <li sec:authorize="hasRole('ADMIN')">
+                                    <a th:href="@{/admin}">Admin felület</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Kapcsolat</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Adatbázis Kártyák Szekció -->
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="section-title">
+                    <span>Adatbázisból betöltve</span>
+                    <h2>Sütemény Kínálatunk</h2>
+                </div>
+
+                <!-- ÚJ GOMB: Oldal újratöltése a véletlen sütikért -->
+                <div class="mb-5" style="margin-bottom: 40px;">
+                    <a th:href="@{/adatbazis}" class="site-btn" style="background: #e53637; color: white;">
+                        <i class="fa fa-refresh"></i> Más sütiket kérek
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <!-- Ciklus a kártyákon -->
+            <div class="col-lg-3 col-md-6 col-sm-6" th:each="suti, iterStat : ${kartyak}">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg"
+                         th:attr="data-setbg=@{'/img/shop/product-' + ${iterStat.index % 8 + 1} + '.jpg'}">
+
+                        <!-- ÚJ CSILLAG: Csak akkor jelenik meg, ha a süti díjazott -->
+                        <!-- A jobb felső sarokban lebeg -->
+                        <div th:if="${suti.dijazott}"
+                             style="position: absolute; top: 10px; right: 10px; background-color: rgba(255, 215, 0, 0.9); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;"
+                             title="Díjazott süti!">
+                            <i class="fa fa-star" style="color: white; font-size: 18px;"></i>
+                        </div>
+
+                        <div class="product__label">
+                            <span th:text="${suti.tipus}">Típus</span>
+                        </div>
+                    </div>
+                    <div class="product__item__text">
+                        <h6><a href="#" th:text="${suti.nev}">Süti Neve</a></h6>
+
+                        <div class="product__item__price" th:text="${suti.arSzoveg}">1000 Ft / db</div>
+
+                        <div class="cart_add" th:if="${not #strings.isEmpty(suti.mentesInfo)}">
+                            <span style="font-size: 14px; color: #e53637; font-weight: bold;">Mentes: </span>
+                            <span th:text="${suti.mentesInfo}" style="font-size: 14px;">G, L</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer set-bg" th:attr="data-setbg=@{/img/footer-bg.jpg}">
+    <div class="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="copyright__text text-white">Zoé Cukrászdája &copy; 2025</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- JS -->
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.nice-select.min.js}"></script>
+<script th:src="@{/js/jquery.barfiller.js}"></script>
+<script th:src="@{/js/jquery.magnific-popup.min.js}"></script>
+<script th:src="@{/js/jquery.slicknav.js}"></script>
+<script th:src="@{/js/owl.carousel.min.js}"></script>
+<script th:src="@{/js/jquery.nicescroll.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
