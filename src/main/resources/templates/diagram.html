@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Zoé Cukrászdája - Statisztika">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Zoé Cukrászdája - Árak</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/flaticon.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/barfiller.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/magnific-popup.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/nice-select.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+
+<div class="offcanvas-menu-overlay"></div>
+<div class="offcanvas-menu-wrapper">
+    <div class="offcanvas__cart">
+        <div class="offcanvas__cart__links">
+            <a href="#" class="search-switch"><img th:src="@{/img/icon/search.png}" alt=""></a>
+            <a href="#"><img th:src="@{/img/icon/heart.png}" alt=""></a>
+        </div>
+    </div>
+    <div class="offcanvas__logo">
+        <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+    </div>
+    <div id="mobile-menu-wrap"></div>
+    <div class="offcanvas__option">
+        <ul>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Belépés</a></li>
+            <li sec:authorize="isAnonymous()"><a th:href="@{/register}">Regisztráció</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="principal.fullName">User</span>
+                <form th:action="@{/logout}" method="post" style="display:inline; margin-left:10px;">
+                    <button type="submit" style="background:none; border:none; color:inherit; cursor:pointer;">Kilépés</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__top__left">
+                            <ul>
+                                <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Belépés</a></li>
+                                <li sec:authorize="isAnonymous()"><a th:href="@{/register}">Regisztrálás</a></li>
+                                <li sec:authorize="isAuthenticated()">Szia, <span sec:authentication="principal.fullName" style="font-weight:bold; color: orange;">Zoé</span>!</li>
+                                <li sec:authorize="isAuthenticated()">
+                                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                                        <button type="submit" style="background:none; border:none; color: black; cursor:pointer; font-size: 14px; font-weight: 500;">Kilépés</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="header__logo">
+                            <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+                        </div>
+                        <div class="header__top__right">
+                            <div class="header__top__right__links">
+                                <a href="#" class="search-switch"><img th:src="@{/img/icon/search.png}" alt=""></a>
+                                <a href="#"><img th:src="@{/img/icon/heart.png}" alt=""></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a th:href="@{/}">Főoldal</a></li>
+                        <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
+                        <li><a href="#">Menü</a></li>
+                        <li class="active"><a th:href="@{/diagram}">Diagram</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Kapcsolat</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="section-title">
+                    <span>Statisztika</span>
+                    <h2>Süteményeink Árai</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-12" style="height: 600px;">
+                <canvas id="arDiagram"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer set-bg" th:attr="data-setbg=@{/img/footer-bg.jpg}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer__widget">
+                    <h6>NYITVATARTÁS</h6>
+                    <ul>
+                        <li>Hétfő - Péntek: 08:00 – 20:30</li>
+                        <li>Hétvége: 10:00 – 16:30</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer__about">
+                    <div class="footer__logo">
+                        <a href="#"><img th:src="@{/img/footer-logo.png}" alt=""></a>
+                    </div>
+                    <p>Zoé Cukrászdája - Ahol az álmok édesre válnak.</p>
+                    <div class="footer__social">
+                        <a href="#"><i class="fa fa-facebook"></i></a>
+                        <a href="#"><i class="fa fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer__newslatter">
+                    <h6>Hírlevél</h6>
+                    <p>Iratkozz fel a legfrissebb ajánlatokért.</p>
+                    <form action="#">
+                        <input type="text" placeholder="Email">
+                        <button type="submit"><i class="fa fa-send-o"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7">
+                    <p class="copyright__text text-white">
+                        Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Zoé Cukrászdája
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="copyright__widget">
+                        <ul>
+                            <li><a href="#">Adatvédelem</a></li>
+                            <li><a href="#">Általános Szerződési Feltételek</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="search-model">
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+            <input type="text" id="search-input" placeholder="Keresés...">
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.nice-select.min.js}"></script>
+<script th:src="@{/js/jquery.barfiller.js}"></script>
+<script th:src="@{/js/jquery.magnific-popup.min.js}"></script>
+<script th:src="@{/js/jquery.slicknav.js}"></script>
+<script th:src="@{/js/owl.carousel.min.js}"></script>
+<script th:src="@{/js/jquery.nicescroll.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Adatok átvétele a Java Controllertől
+    var labels = /*[[${labels}]]*/ [];
+    var data = /*[[${data}]]*/ [];
+
+    var ctx = document.getElementById('arDiagram').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar', // Típus: Oszlopdiagram
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sütemény ára (Ft)',
+                data: data,
+                backgroundColor: 'rgba(235, 156, 92, 0.7)', // A téma színe (narancs)
+                borderColor: 'rgba(235, 156, 92, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            // MÓDOSÍTÁS 2: Engedélyezzük, hogy kitöltse a konténer magasságát
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>
