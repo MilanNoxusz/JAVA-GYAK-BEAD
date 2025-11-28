@@ -73,10 +73,12 @@
                     <ul>
                         <li><a th:href="@{/}">Főoldal</a></li>
                         <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
-                        <li><a href="#">Menü</a></li>
+                        <li><a th:href="@{/contact}">Kapcsolat</a></li>
+                        <!-- Csak bejelentkezett felhasználóknak -->
+                        <li sec:authorize="isAuthenticated()"><a th:href="@{/messages}">Üzenetek</a></li>
                         <li><a th:href="@{/diagram}">Diagram</a></li>
                         <li><a th:href="@{/crud}">CRUD</a></li>
-                        <li class="active"><a th:href="@{/restapi}">REST API</a></li>
+                        <li class="active"><a th:href="@{/rest}">RESTful</a></li>
                     </ul>
                 </nav>
             </div>
