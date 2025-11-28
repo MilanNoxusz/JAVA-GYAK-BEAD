@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -192,9 +193,17 @@ public class AuthController {
 
     @GetMapping("/crud/uj")
     public String showAddForm(Model model) {
-        // Egy üres Suti objektumot küldünk a formnak
-        model.addAttribute("suti", new Suti());
-        // Jelezzük a nézetnek, hogy ez egy új létrehozása (így az ID mező szerkeszthető lesz)
+        Suti ujSuti = new Suti();
+
+        Long maxId = sutiRepo.findAll().stream()
+                .mapToLong(Suti::getId)
+                .max()
+                .orElse(0L);
+
+        ujSuti.setId(maxId + 1);
+
+
+        model.addAttribute("suti", ujSuti);
         model.addAttribute("isNew", true);
         return "crud_form";
     }
@@ -220,9 +229,14 @@ public class AuthController {
     }
 
 
-    @GetMapping("/crud/delete/{id}")
-    public String deleteSuti(@PathVariable Long id) {
-        sutiRepo.deleteById(id);
+    @GetMapping("/crud/torles/{id}")
+    public String deleteSuti(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            sutiRepo.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "A sütemény sikeresen törölve (ID: " + id + ").");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Hiba történt a törlés során!");
+        }
         return "redirect:/crud";
     }
 

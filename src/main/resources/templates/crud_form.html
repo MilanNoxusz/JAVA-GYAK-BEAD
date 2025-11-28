@@ -60,8 +60,8 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="checkout__input">
-                                <p>Azonosító (ID)<span>*</span></p>
-                                <input type="number" th:field="*{id}" required th:readonly="${!isNew}">
+                                <p>Azonosító (ID) - <i>Automatikusan generált</i><span></span></p>
+                                <input type="number" th:field="*{id}" readonly style="background-color: #e9ecef;">
                             </div>
 
                             <div class="checkout__input">
@@ -107,5 +107,8 @@
 <script th:src="@{/js/bootstrap.min.js}"></script>
 <script th:src="@{/js/jquery.slicknav.js}"></script>
 <script th:src="@{/js/main.js}"></script>
+
+
+
 </body>
 </html>
