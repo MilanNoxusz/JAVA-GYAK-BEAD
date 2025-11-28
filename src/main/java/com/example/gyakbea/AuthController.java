@@ -38,10 +38,14 @@ public class AuthController {
 
     // --- ALAP OLDALAK ---
     @GetMapping("/")
-    public String index() { return "index"; }
+    public String index() {
+        return "index";
+    }
 
     @GetMapping("/login")
-    public String login() { return "login"; }
+    public String login() {
+        return "login";
+    }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -90,10 +94,14 @@ public class AuthController {
     }
 
     @GetMapping("/rest")
-    public String showRest() { return "rest"; }
+    public String showRest() {
+        return "rest";
+    }
 
     @GetMapping("/admin")
-    public String adminRedirect() { return "redirect:/crud"; }
+    public String adminRedirect() {
+        return "redirect:/crud";
+    }
 
     // --- KAPCSOLAT (ITT A VÁLTOZÁS) ---
     @GetMapping("/contact")
@@ -182,10 +190,42 @@ public class AuthController {
         return "crud";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/crud/uj")
+    public String showAddForm(Model model) {
+        // Egy üres Suti objektumot küldünk a formnak
+        model.addAttribute("suti", new Suti());
+        // Jelezzük a nézetnek, hogy ez egy új létrehozása (így az ID mező szerkeszthető lesz)
+        model.addAttribute("isNew", true);
+        return "crud_form";
+    }
+
+
+    @PostMapping("/crud/mentes")
+    public String saveSuti(@ModelAttribute Suti suti) {
+        // A save metódus létrehozza az újat vagy frissíti a meglévőt az ID alapján
+        sutiRepo.save(suti);
+        return "redirect:/crud";
+    }
+
+
+    @GetMapping("/crud/szerkeszt/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        // Megkeressük a sütit ID alapján
+        Suti suti = sutiRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Érvénytelen süti ID: " + id));
+
+        model.addAttribute("suti", suti);
+        model.addAttribute("isNew", false);
+        return "crud_form";
+    }
+
+
     @GetMapping("/crud/delete/{id}")
     public String deleteSuti(@PathVariable Long id) {
         sutiRepo.deleteById(id);
         return "redirect:/crud";
     }
+
+
 }
+
