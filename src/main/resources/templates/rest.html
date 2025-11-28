@@ -79,6 +79,9 @@
                         <li><a th:href="@{/diagram}">Diagram</a></li>
                         <li><a th:href="@{/crud}">CRUD</a></li>
                         <li class="active"><a th:href="@{/rest}">RESTful</a></li>
+
+                        <!-- Csak Adminnak -->
+                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/crud}">Admin (CRUD)</a></li>
                     </ul>
                 </nav>
             </div>

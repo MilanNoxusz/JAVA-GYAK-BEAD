@@ -37,22 +37,18 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        // Statikus erőforrások (mindenki számára elérhető)
+                        // Statikus fájlok
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/fonts/**", "/sass/**").permitAll()
 
-                        // Publikus oldalak (Bejelentkezés nélkül is elérhető)
-                        // Főoldal, Adatbázis, Kapcsolat űrlap (megtekintés), Login, Regisztráció
+                        // PUBLIKUS oldalak (Vendég is látja a leírásod alapján: Diagram, CRUD, REST is!)
                         .requestMatchers("/", "/index", "/adatbazis", "/contact", "/login", "/register", "/regisztral_feldolgoz").permitAll()
+                        .requestMatchers("/diagram", "/crud", "/rest").permitAll() // Ezeket kérted, hogy a vendég is lássa
 
-                        // Védett oldalak (Csak bejelentkezett felhasználóknak: USER vagy ADMIN)
-                        // Üzenetek megtekintése, Diagram, Kapcsolat POST (üzenet küldés), RESTful
-                        // Megjegyzés: A feladat szerint a vendég írhat üzenetet, de csak regisztrálva láthatja.
-                        // Ezért a /contact POST is lehet publikus, de a /messages védett.
-                        .requestMatchers("/messages/**", "/diagram/**", "/rest/**").hasAnyRole("USER", "ADMIN")
+                        // Védett oldalak (Csak bejelentkezett felhasználóknak)
+                        .requestMatchers("/messages/**").hasAnyRole("USER", "ADMIN")
 
-                        // Admin oldalak (Csak ADMIN)
-                        // CRUD felület és az Admin menüpont céloldala
-                        .requestMatchers("/admin/**", "/crud/**").hasRole("ADMIN")
+                        // Admin oldalak
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Minden más hitelesítést igényel
                         .anyRequest().authenticated()

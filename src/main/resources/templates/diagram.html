@@ -97,10 +97,15 @@
                     <ul>
                         <li><a th:href="@{/}">Főoldal</a></li>
                         <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
-                        <li><a href="#">Menü</a></li>
+                        <li><a th:href="@{/contact}">Kapcsolat</a></li>
+                        <!-- Csak bejelentkezett felhasználóknak -->
+                        <li sec:authorize="isAuthenticated()"><a th:href="@{/messages}">Üzenetek</a></li>
                         <li class="active"><a th:href="@{/diagram}">Diagram</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Kapcsolat</a></li>
+                        <li><a th:href="@{/crud}">CRUD</a></li>
+                        <li><a th:href="@{/rest}">RESTful</a></li>
+
+                        <!-- Csak Adminnak -->
+                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/crud}">Admin (CRUD)</a></li>
                     </ul>
                 </nav>
             </div>
