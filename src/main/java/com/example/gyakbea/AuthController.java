@@ -63,7 +63,31 @@ public class AuthController {
 
     // --- STATIKUS OLDALAK ---
     @GetMapping("/diagram")
-    public String showDiagram() { return "diagram"; }
+    public String showDiagram(Model model) {
+        // 1. Lekérjük az összes sütit
+        List<Suti> sutik = sutiRepo.findAll();
+
+        // 2. Létrehozzuk a listákat a címkéknek (nevek) és az adatoknak (árak)
+        List<String> labels = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+
+        // 3. Végigmegyünk a sütiken, és megkeressük a hozzájuk tartozó árat
+        for (Suti s : sutik) {
+            List<Ar> arak = arRepo.findBySutiid(s.getId());
+
+            // Csak akkor adjuk hozzá, ha van ára
+            if (!arak.isEmpty()) {
+                labels.add(s.getNev());           // A süti neve lesz a címke (X tengely)
+                data.add(arak.get(0).getErtek()); // Az ár lesz az érték (Y tengely)
+            }
+        }
+
+        // 4. Átadjuk az adatokat a Thymeleaf sablonnak
+        model.addAttribute("labels", labels);
+        model.addAttribute("data", data);
+
+        return "diagram";
+    }
 
     @GetMapping("/rest")
     public String showRest() { return "rest"; }
