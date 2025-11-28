@@ -53,16 +53,7 @@
                         <li><a th:href="@{/}">Főoldal</a></li>
                         <li class="active"><a th:href="@{/adatbazis}">Adatbázis</a></li>
                         <li><a href="#">Menü</a></li>
-                        <li><a href="#">Oldalak</a>
-                            <ul class="dropdown">
-                                <li sec:authorize="hasAnyRole('USER', 'ADMIN')">
-                                    <a th:href="@{/messages}">Üzenetek</a>
-                                </li>
-                                <li sec:authorize="hasRole('ADMIN')">
-                                    <a th:href="@{/admin}">Admin felület</a>
-                                </li>
-                            </ul>
-                        </li>
+                        <li><a th:href="@{/diagram}">Diagram</a></li>
                         <li><a href="#">Blog</a></li>
                         <li><a href="#">Kapcsolat</a></li>
                     </ul>
