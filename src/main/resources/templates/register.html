@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Zoé Cukrászdája - Regisztráció">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regisztráció | Zoé Cukrászdája</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+</head>
+
+<body>
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__top__inner">
+                        <div class="header__logo">
+                            <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a th:href="@{/}">Vissza a főoldalra</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="contact spad">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-8">
+                <div class="contact__form" style="background: #fdf3ea; padding: 40px; border-radius: 5px;">
+                    <div class="section-title">
+                        <span>Csatlakozz hozzánk</span>
+                        <h2>Regisztráció</h2>
+                    </div>
+
+                    <form th:action="@{/regisztral_feldolgoz}" th:object="${user}" method="post">
+
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                        <div class="checkout__input">
+                            <p>Teljes név<span>*</span></p>
+                            <input type="text" th:field="*{name}" placeholder="pl. Kiss János" required
+                                   style="width: 100%; height: 50px; border: 1px solid #e1e1e1; padding-left: 20px; margin-bottom: 20px;">
+                        </div>
+
+                        <div class="checkout__input">
+                            <p>Email cím<span>*</span></p>
+                            <input type="email" th:field="*{email}" placeholder="Email címed" required
+                                   style="width: 100%; height: 50px; border: 1px solid #e1e1e1; padding-left: 20px; margin-bottom: 20px;">
+                        </div>
+
+                        <div class="checkout__input">
+                            <p>Jelszó<span>*</span></p>
+                            <input type="password" th:field="*{password}" placeholder="Jelszavad" required
+                                   style="width: 100%; height: 50px; border: 1px solid #e1e1e1; padding-left: 20px; margin-bottom: 20px;">
+                        </div>
+
+                        <button type="submit" class="site-btn" style="width: 100%;">Regisztráció</button>
+
+                        <div class="text-center mt-3">
+                            <a th:href="@{/login}" style="color: #111;">Már van fiókod? Belépés</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer set-bg" th:attr="data-setbg=@{/img/footer-bg.jpg}">
+    <div class="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p class="copyright__text text-white">Zoé Cukrászdája &copy; 2025</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
