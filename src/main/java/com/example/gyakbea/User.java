@@ -1,7 +1,5 @@
 package com.example.gyakbea;
 
-public class User package com.example.gyakbea;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -47,5 +45,4 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
-}{
 }
