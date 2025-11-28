@@ -50,13 +50,12 @@
                         <li><a th:href="@{/}">Főoldal</a></li>
                         <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
                         <li class="active"><a th:href="@{/contact}">Kapcsolat</a></li>
+
                         <!-- Csak bejelentkezett felhasználóknak -->
                         <li sec:authorize="isAuthenticated()"><a th:href="@{/messages}">Üzenetek</a></li>
                         <li><a th:href="@{/diagram}">Diagram</a></li>
                         <li><a th:href="@{/crud}">CRUD</a></li>
                         <li><a th:href="@{/rest}">RESTful</a></li>
-
-
 
                         <!-- Csak Adminnak -->
                         <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/crud}">Admin (CRUD)</a></li>
@@ -86,7 +85,7 @@
 
                     <!-- Vendég figyelmeztetés -->
                     <div th:if="${!isLoggedIn}" class="alert alert-warning">
-                        <strong>Figyelem!</strong> Ön vendégként posztol üzenetet. Ha később meg szeretné tekinteni üzeneteit, kérjük regisztráljon és jelentkezzen be!
+                        <strong>Figyelem!</strong> Ön vendégként posztol üzenetet. Az email címét szabadon megadhatja a válaszhoz.
                     </div>
 
                     <div th:if="${param.success}" class="alert alert-success">
@@ -96,17 +95,17 @@
                     <form th:action="@{/contact}" th:object="${messageObj}" method="post">
                         <div class="row">
                             <div class="col-lg-6">
-                                <!-- Ha be van lépve (isLoggedIn), akkor READONLY -->
+                                <!-- NÉV: Mindig READONLY (vagy "Vendég" vagy a User neve) -->
                                 <input type="text" th:field="*{name}" placeholder="Neved"
-                                       th:readonly="${isLoggedIn}"
-                                       th:classappend="${isLoggedIn} ? 'bg-light' : ''">
+                                       readonly style="background-color: #f8f9fa; cursor: not-allowed;">
                                 <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Hiba</div>
                             </div>
                             <div class="col-lg-6">
-                                <!-- Ha be van lépve (isLoggedIn), akkor READONLY -->
+                                <!-- EMAIL: Csak akkor READONLY, ha be van lépve (isLoggedIn) -->
                                 <input type="text" th:field="*{email}" placeholder="Email címed"
                                        th:readonly="${isLoggedIn}"
-                                       th:classappend="${isLoggedIn} ? 'bg-light' : ''">
+                                       th:classappend="${isLoggedIn} ? 'bg-light' : ''"
+                                       th:style="${isLoggedIn} ? 'background-color: #f8f9fa; cursor: not-allowed;' : ''">
                                 <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Hiba</div>
                             </div>
                             <div class="col-lg-12">

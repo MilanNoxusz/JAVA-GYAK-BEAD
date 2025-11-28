@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Controller
 public class AuthController {
 
-    // --- REPOSITORY-K INJEKTÁLÁSA ---
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -36,22 +36,12 @@ public class AuthController {
     @Autowired
     private TartalomRepository tartalomRepo;
 
-    // --- ALAP OLDALAK (Home, Login, Register) ---
-
+    // --- ALAP OLDALAK ---
     @GetMapping("/")
-    public String index() {
-        return "index";
-    }
-
-    @GetMapping("/index")
-    public String indexAlias() {
-        return "index";
-    }
+    public String index() { return "index"; }
 
     @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+    public String login() { return "login"; }
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -71,26 +61,17 @@ public class AuthController {
         return "redirect:/login?success";
     }
 
-    // --- STATIKUS OLDALAK (Diagram, REST) ---
-
+    // --- STATIKUS OLDALAK ---
     @GetMapping("/diagram")
-    public String showDiagram() {
-        return "diagram";
-    }
+    public String showDiagram() { return "diagram"; }
 
     @GetMapping("/rest")
-    public String showRest() {
-        return "rest";
-    }
+    public String showRest() { return "rest"; }
 
-    // --- ADMIN OLDAL (Átirányítás CRUD-ra) ---
     @GetMapping("/admin")
-    public String adminRedirect() {
-        return "redirect:/crud";
-    }
+    public String adminRedirect() { return "redirect:/crud"; }
 
-    // --- KAPCSOLAT ÉS ÜZENETEK ---
-
+    // --- KAPCSOLAT (ITT A VÁLTOZÁS) ---
     @GetMapping("/contact")
     public String showContactForm(Model model) {
         Message message = new Message();
@@ -98,11 +79,14 @@ public class AuthController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            // Ha be van lépve: Kitöltjük a nevet és emailt
             isLoggedIn = true;
             CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-            // Automatikus kitöltés
             message.setName(userDetails.getFullName());
             message.setEmail(userDetails.getUsername());
+        } else {
+            // Ha VENDÉG: A nevet beállítjuk "Vendég"-re
+            message.setName("Vendég");
         }
 
         model.addAttribute("messageObj", message);
@@ -129,7 +113,6 @@ public class AuthController {
         if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/login";
         }
-
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         String currentEmail = userDetails.getUsername();
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
@@ -140,48 +123,34 @@ public class AuthController {
         } else {
             messages = messageRepository.findByEmailOrderByCreatedAtDesc(currentEmail);
         }
-
         model.addAttribute("messages", messages);
         return "messages";
     }
 
-    // --- ADATBÁZIS (Sütik kártyás megjelenítése) ---
-
+    // --- ADATBÁZIS (Sütik) ---
     @GetMapping("/adatbazis")
     public String adatbazisPage(Model model) {
         List<SutiDTO> kartyak = new ArrayList<>();
         List<Suti> sutik = sutiRepo.findAll();
-
-        // Véletlenszerű sorrend
         Collections.shuffle(sutik);
 
         int limit = 0;
         for (Suti s : sutik) {
             if (limit >= 8) break;
-
             List<Ar> arak = arRepo.findBySutiid(s.getId());
-            String arStr = "Nincs ár";
-            if (!arak.isEmpty()) {
-                Ar ar = arak.get(0);
-                arStr = ar.getErtek() + " Ft / " + ar.getEgyseg();
-            }
+            String arStr = (!arak.isEmpty()) ? arak.get(0).getErtek() + " Ft / " + arak.get(0).getEgyseg() : "Nincs ár";
 
             List<Tartalom> tartalmak = tartalomRepo.findBySutiid(s.getId());
-            String mentesStr = "";
-            if (!tartalmak.isEmpty()) {
-                mentesStr = tartalmak.stream().map(Tartalom::getMentes).collect(Collectors.joining(", "));
-            }
+            String mentesStr = (!tartalmak.isEmpty()) ? tartalmak.stream().map(Tartalom::getMentes).collect(Collectors.joining(", ")) : "";
 
             kartyak.add(new SutiDTO(s.getId(), s.getNev(), s.getTipus(), arStr, mentesStr, s.getDijazott()));
             limit++;
         }
-
         model.addAttribute("kartyak", kartyak);
         return "adatbazis";
     }
 
-    // --- CRUD (Admin felület) ---
-
+    // --- CRUD ---
     @GetMapping("/crud")
     public String listSutik(Model model) {
         List<Suti> sutik = sutiRepo.findAll();
