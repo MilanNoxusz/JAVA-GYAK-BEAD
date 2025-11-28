@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoé Cukrászdája - REST API</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/flaticon.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/barfiller.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/magnific-popup.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/elegant-icons.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/nice-select.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/owl.carousel.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/slicknav.min.css}" type="text/css">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css">
+
+    <style>
+        .api-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .api-method {
+            font-weight: bold;
+            display: inline-block;
+            width: 60px;
+        }
+        .method-get { color: green; }
+        .method-post { color: orange; }
+        .method-put { color: blue; }
+        .method-delete { color: red; }
+        #jsonResult {
+            background: #2d2d2d;
+            color: #76ff03;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+<div id="preloder"><div class="loader"></div></div>
+
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header__logo text-center">
+                        <a th:href="@{/}"><img th:src="@{/img/logo.png}" alt=""></a>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas__open"><i class="fa fa-bars"></i></div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <nav class="header__menu mobile-menu">
+                    <ul>
+                        <li><a th:href="@{/}">Főoldal</a></li>
+                        <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
+                        <li><a href="#">Menü</a></li>
+                        <li><a th:href="@{/diagram}">Diagram</a></li>
+                        <li><a th:href="@{/crud}">CRUD</a></li>
+                        <li class="active"><a th:href="@{/restapi}">REST API</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="section-title">
+                    <span>Fejlesztőknek</span>
+                    <h2>REST API Dokumentáció</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="api-box">
+                    <h4>Végpontok</h4>
+                    <hr>
+                    <p><span class="api-method method-get">GET</span> /api/sutik - Összes süti listázása</p>
+                    <p><span class="api-method method-get">GET</span> /api/sutik/{id} - Egy süti lekérése</p>
+                    <p><span class="api-method method-post">POST</span> /api/sutik - Új süti felvitele</p>
+                    <p><span class="api-method method-put">PUT</span> /api/sutik/{id} - Süti módosítása</p>
+                    <p><span class="api-method method-delete">DELETE</span> /api/sutik/{id} - Süti törlése</p>
+                </div>
+                <div class="api-box">
+                    <h4>Tesztelés (Kliens oldali JS)</h4>
+                    <p>Kattints a gombra, hogy lekérd az adatokat közvetlenül a backendről aszinkron módon (AJAX/Fetch).</p>
+                    <button onclick="fetchData()" class="site-btn">Adatok betöltése</button>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="api-box">
+                    <h4>JSON Válasz:</h4>
+                    <div id="jsonResult">Kattints a gombra az adatok betöltéséhez...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer set-bg" th:attr="data-setbg=@{/img/footer-bg.jpg}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="footer__logo">
+                    <a href="#"><img th:src="@{/img/footer-logo.png}" alt=""></a>
+                </div>
+                <p class="text-white mt-3">Zoé Cukrászdája REST API Felület</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.nice-select.min.js}"></script>
+<script th:src="@{/js/jquery.barfiller.js}"></script>
+<script th:src="@{/js/jquery.magnific-popup.min.js}"></script>
+<script th:src="@{/js/jquery.slicknav.js}"></script>
+<script th:src="@{/js/owl.carousel.min.js}"></script>
+<script th:src="@{/js/jquery.nicescroll.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    function fetchData() {
+        document.getElementById('jsonResult').innerText = "Betöltés...";
+        fetch('/api/sutik')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('jsonResult').innerText = JSON.stringify(data, null, 4);
+            })
+            .catch(error => {
+                document.getElementById('jsonResult').innerText = "Hiba történt: " + error;
+            });
+    }
+</script>
+</body>
+</html>
