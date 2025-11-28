@@ -19,46 +19,54 @@ public class ContactController {
     @Autowired
     private MessageRepository messageRepository;
 
-    // 1. Kapcsolat űrlap megjelenítése (Autokitöltéssel)
+    // 1. Kapcsolat űrlap megjelenítése
     @GetMapping("/contact")
     public String showContactForm(Model model) {
         Message message = new Message();
+        boolean isLoggedIn = false;
 
-        // Lekérjük a jelenlegi hitelesítési információt
+        // Lekérjük a hitelesítési infót
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Ellenőrizzük, hogy a felhasználó be van-e jelentkezve (és nem csak "anonymous")
+        // Ellenőrizzük, hogy be van-e jelentkezve
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
-            // Ha be van lépve, elkérjük az adatait
+            isLoggedIn = true;
             CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
 
-            // Beállítjuk a nevet és az emailt az űrlap objektumba
-            // Így a HTML űrlap mezői automatikusan kitöltődnek
+            // Ha be van lépve, kitöltjük az adatait
             message.setName(userDetails.getFullName());
-            message.setEmail(userDetails.getUsername()); // A username nálunk az email
+            message.setEmail(userDetails.getUsername());
         }
 
         model.addAttribute("messageObj", message);
+        model.addAttribute("isLoggedIn", isLoggedIn); // Ezt felhasználjuk a HTML-ben a figyelmeztetéshez
         return "contact";
     }
 
-    // 2. Üzenet elküldése (Validációval)
+    // 2. Üzenet elküldése
     @PostMapping("/contact")
     public String sendMessage(@Valid @ModelAttribute("messageObj") Message message, BindingResult bindingResult, Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isLoggedIn = auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails;
+
+        // Ha be van jelentkezve, szerver oldalon is felülírhatjuk/ellenőrizhetjük az emailt a biztonság kedvéért,
+        // de a feladat szerint "NE TUDJA MÓDOSÍTANI" -> ezt a HTML-ben `readonly` attribútummal oldjuk meg.
+
         if (bindingResult.hasErrors()) {
-            return "contact"; // Ha hiba van, visszaküldjük az űrlapra a hibaüzenetekkel
+            model.addAttribute("isLoggedIn", isLoggedIn); // Hiba esetén is kell a változó
+            return "contact";
         }
 
-        messageRepository.save(message); // Mentés az adatbázisba
+        messageRepository.save(message);
         return "redirect:/contact?success";
     }
 
-    // 3. Üzenetek listázása (Csak belépett felhasználóknak)
+    // 3. Üzenetek listázása (Csak belépett felhasználóknak - WebSecurityConfig védi)
     @GetMapping("/messages")
     public String showMessages(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Biztonsági ellenőrzés (bár a WebSecurityConfig is védi)
+        // Extra védelem, bár a config is szűri
         if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/login";
         }
@@ -71,10 +79,8 @@ public class ContactController {
 
         List<Message> messages;
         if (isAdmin) {
-            // Admin minden üzenetet lát
             messages = messageRepository.findAllByOrderByCreatedAtDesc();
         } else {
-            // Sima felhasználó csak a sajátjait (email alapján)
             messages = messageRepository.findByEmailOrderByCreatedAtDesc(currentEmail);
         }
 

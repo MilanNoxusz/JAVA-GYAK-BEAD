@@ -3,7 +3,7 @@ package com.example.gyakbea;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // ÚJ IMPORT
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // A tanár által kért új annotáció a régi @EnableGlobalMethodSecurity helyett
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     @Bean
@@ -28,7 +28,6 @@ public class WebSecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        // JAVÍTVA: A konstruktornak átadjuk a userDetailsService-t (Spring Security 6+ elvárás)
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
@@ -38,15 +37,24 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        // Statikus fájlok engedélyezése (CSS, Képek, JS, Fonts)
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/fonts/**").permitAll()
-                        // Nyilvános oldalak
-                        .requestMatchers("/", "/index", "/register", "/regisztral_feldolgoz").permitAll()
-                        // Admin oldal
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Üzenetek oldal
-                        .requestMatchers("/messages/**").hasAnyRole("USER", "ADMIN")
-                        // Minden más csak bejelentkezés után
+                        // Statikus erőforrások (mindenki számára elérhető)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/fonts/**", "/sass/**").permitAll()
+
+                        // Publikus oldalak (Bejelentkezés nélkül is elérhető)
+                        // Főoldal, Adatbázis, Kapcsolat űrlap (megtekintés), Login, Regisztráció
+                        .requestMatchers("/", "/index", "/adatbazis", "/contact", "/login", "/register", "/regisztral_feldolgoz").permitAll()
+
+                        // Védett oldalak (Csak bejelentkezett felhasználóknak: USER vagy ADMIN)
+                        // Üzenetek megtekintése, Diagram, Kapcsolat POST (üzenet küldés), RESTful
+                        // Megjegyzés: A feladat szerint a vendég írhat üzenetet, de csak regisztrálva láthatja.
+                        // Ezért a /contact POST is lehet publikus, de a /messages védett.
+                        .requestMatchers("/messages/**", "/diagram/**", "/rest/**").hasAnyRole("USER", "ADMIN")
+
+                        // Admin oldalak (Csak ADMIN)
+                        // CRUD felület és az Admin menüpont céloldala
+                        .requestMatchers("/admin/**", "/crud/**").hasRole("ADMIN")
+
+                        // Minden más hitelesítést igényel
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form

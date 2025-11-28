@@ -49,8 +49,16 @@
                     <ul>
                         <li><a th:href="@{/}">Főoldal</a></li>
                         <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
-                        <li sec:authorize="hasAnyRole('USER', 'ADMIN')"><a th:href="@{/messages}">Üzenetek</a></li>
-                        <li class="active"><a th:href="@{/contact}">Kapcsolat</a></li>
+                        <li   class="active"><a th:href="@{/contact}">Kapcsolat</a></li>
+                        <li><a th:href="@{/diagram}">Diagram</a></li>
+                        <li><a th:href="@{/crud}">CRUD</a></li>
+                        <li><a th:href="@{/rest}">RESTful</a></li>
+
+                        <!-- Csak bejelentkezett felhasználóknak -->
+                        <li sec:authorize="isAuthenticated()"><a th:href="@{/messages}">Üzenetek</a></li>
+
+                        <!-- Csak Adminnak -->
+                        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/crud}">Admin (CRUD)</a></li>
                     </ul>
                 </nav>
             </div>
@@ -75,6 +83,11 @@
             <div class="col-lg-8">
                 <div class="contact__form">
 
+                    <!-- Vendég figyelmeztetés -->
+                    <div th:if="${!isLoggedIn}" class="alert alert-warning">
+                        <strong>Figyelem!</strong> Ön vendégként posztol üzenetet. Ha később meg szeretné tekinteni üzeneteit, kérjük regisztráljon és jelentkezzen be!
+                    </div>
+
                     <div th:if="${param.success}" class="alert alert-success">
                         Üzenet sikeresen elküldve! Köszönjük.
                     </div>
@@ -82,11 +95,17 @@
                     <form th:action="@{/contact}" th:object="${messageObj}" method="post">
                         <div class="row">
                             <div class="col-lg-6">
-                                <input type="text" th:field="*{name}" placeholder="Neved">
+                                <!-- Ha be van lépve (isLoggedIn), akkor READONLY -->
+                                <input type="text" th:field="*{name}" placeholder="Neved"
+                                       th:readonly="${isLoggedIn}"
+                                       th:classappend="${isLoggedIn} ? 'bg-light' : ''">
                                 <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Hiba</div>
                             </div>
                             <div class="col-lg-6">
-                                <input type="text" th:field="*{email}" placeholder="Email címed">
+                                <!-- Ha be van lépve (isLoggedIn), akkor READONLY -->
+                                <input type="text" th:field="*{email}" placeholder="Email címed"
+                                       th:readonly="${isLoggedIn}"
+                                       th:classappend="${isLoggedIn} ? 'bg-light' : ''">
                                 <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Hiba</div>
                             </div>
                             <div class="col-lg-12">
