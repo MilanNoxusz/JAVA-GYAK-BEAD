@@ -19,10 +19,26 @@ public class ContactController {
     @Autowired
     private MessageRepository messageRepository;
 
-    // 1. Kapcsolat űrlap megjelenítése (Bárki láthatja)
+    // 1. Kapcsolat űrlap megjelenítése (Autokitöltéssel)
     @GetMapping("/contact")
     public String showContactForm(Model model) {
-        model.addAttribute("messageObj", new Message());
+        Message message = new Message();
+
+        // Lekérjük a jelenlegi hitelesítési információt
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Ellenőrizzük, hogy a felhasználó be van-e jelentkezve (és nem csak "anonymous")
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            // Ha be van lépve, elkérjük az adatait
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+
+            // Beállítjuk a nevet és az emailt az űrlap objektumba
+            // Így a HTML űrlap mezői automatikusan kitöltődnek
+            message.setName(userDetails.getFullName());
+            message.setEmail(userDetails.getUsername()); // A username nálunk az email
+        }
+
+        model.addAttribute("messageObj", message);
         return "contact";
     }
 
@@ -41,7 +57,15 @@ public class ContactController {
     @GetMapping("/messages")
     public String showMessages(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = ((CustomUserDetails) auth.getPrincipal()).getUsername();
+
+        // Biztonsági ellenőrzés (bár a WebSecurityConfig is védi)
+        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            return "redirect:/login";
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        String currentEmail = userDetails.getUsername();
+
         boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 

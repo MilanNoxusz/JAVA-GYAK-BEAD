@@ -108,7 +108,13 @@
                     <ul>
                         <li class="active"><a th:href="@{/}">Főoldal</a></li>
                         <li><a th:href="@{/adatbazis}">Adatbázis</a></li>
-                        <li><a href="#">Menü</a></li>
+                        <li sec:authorize="hasAnyRole('USER', 'ADMIN')">
+                            <a th:href="@{/contact}">Kapcsolat</a>
+                        </li>
+                        <li sec:authorize="hasAnyRole('USER', 'ADMIN')">
+                            <a th:href="@{/messages}">Üzenetek</a>
+                        </li>
+
                         <li><a th:href="@{/diagram}">Diagram</a></li>
                         <li><a th:href="@{/crud}">CRUD</a></li>
                         <li><a href="#">Kapcsolat</a></li>
