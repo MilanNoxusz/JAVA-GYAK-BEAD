@@ -1,66 +1,198 @@
 package com.example.gyakbea;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class AuthController {
 
+    // --- REPOSITORY-K INJEKTÁLÁSA ---
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
+    private SutiRepository sutiRepo;
+    @Autowired
+    private ArRepository arRepo;
+    @Autowired
+    private TartalomRepository tartalomRepo;
 
-    // Főoldal
+    // --- ALAP OLDALAK (Home, Login, Register) ---
+
     @GetMapping("/")
     public String index() {
         return "index";
     }
 
-    // Login oldal
+    @GetMapping("/index")
+    public String indexAlias() {
+        return "index";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
     }
 
-    // Regisztrációs űrlap megjelenítése
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
 
-    // Regisztráció feldolgozása
     @PostMapping("/regisztral_feldolgoz")
     public String registerUser(@ModelAttribute User user, Model model) {
-        // Ellenőrizzük, hogy van-e már ilyen email
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             model.addAttribute("error", "Ez az email cím már foglalt!");
             return "register";
         }
-
-        // Jelszó titkosítása
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // Alapértelmezett szerepkör: Regisztrált látogató (ROLE_USER)
         user.setRole("ROLE_USER");
-
         userRepository.save(user);
-
         return "redirect:/login?success";
     }
 
-    // Admin oldal (csak teszt, később bővíthető)
-    @GetMapping("/admin")
-    public String adminPage() {
-        return "index"; // Vagy külön admin.html
+    // --- STATIKUS OLDALAK (Diagram, REST) ---
+
+    @GetMapping("/diagram")
+    public String showDiagram() {
+        return "diagram";
     }
 
-    // FONTOS: A "/messages" metódus INNEN TÖRÖLVE LETT, hogy ne ütközzön a ContactController-el!
+    @GetMapping("/rest")
+    public String showRest() {
+        return "rest";
+    }
+
+    // --- ADMIN OLDAL (Átirányítás CRUD-ra) ---
+    @GetMapping("/admin")
+    public String adminRedirect() {
+        return "redirect:/crud";
+    }
+
+    // --- KAPCSOLAT ÉS ÜZENETEK ---
+
+    @GetMapping("/contact")
+    public String showContactForm(Model model) {
+        Message message = new Message();
+        boolean isLoggedIn = false;
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails) {
+            isLoggedIn = true;
+            CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+            // Automatikus kitöltés
+            message.setName(userDetails.getFullName());
+            message.setEmail(userDetails.getUsername());
+        }
+
+        model.addAttribute("messageObj", message);
+        model.addAttribute("isLoggedIn", isLoggedIn);
+        return "contact";
+    }
+
+    @PostMapping("/contact")
+    public String sendMessage(@Valid @ModelAttribute("messageObj") Message message, BindingResult bindingResult, Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isLoggedIn = auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserDetails;
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("isLoggedIn", isLoggedIn);
+            return "contact";
+        }
+        messageRepository.save(message);
+        return "redirect:/contact?success";
+    }
+
+    @GetMapping("/messages")
+    public String showMessages(Model model) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
+            return "redirect:/login";
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        String currentEmail = userDetails.getUsername();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        List<Message> messages;
+        if (isAdmin) {
+            messages = messageRepository.findAllByOrderByCreatedAtDesc();
+        } else {
+            messages = messageRepository.findByEmailOrderByCreatedAtDesc(currentEmail);
+        }
+
+        model.addAttribute("messages", messages);
+        return "messages";
+    }
+
+    // --- ADATBÁZIS (Sütik kártyás megjelenítése) ---
+
+    @GetMapping("/adatbazis")
+    public String adatbazisPage(Model model) {
+        List<SutiDTO> kartyak = new ArrayList<>();
+        List<Suti> sutik = sutiRepo.findAll();
+
+        // Véletlenszerű sorrend
+        Collections.shuffle(sutik);
+
+        int limit = 0;
+        for (Suti s : sutik) {
+            if (limit >= 8) break;
+
+            List<Ar> arak = arRepo.findBySutiid(s.getId());
+            String arStr = "Nincs ár";
+            if (!arak.isEmpty()) {
+                Ar ar = arak.get(0);
+                arStr = ar.getErtek() + " Ft / " + ar.getEgyseg();
+            }
+
+            List<Tartalom> tartalmak = tartalomRepo.findBySutiid(s.getId());
+            String mentesStr = "";
+            if (!tartalmak.isEmpty()) {
+                mentesStr = tartalmak.stream().map(Tartalom::getMentes).collect(Collectors.joining(", "));
+            }
+
+            kartyak.add(new SutiDTO(s.getId(), s.getNev(), s.getTipus(), arStr, mentesStr, s.getDijazott()));
+            limit++;
+        }
+
+        model.addAttribute("kartyak", kartyak);
+        return "adatbazis";
+    }
+
+    // --- CRUD (Admin felület) ---
+
+    @GetMapping("/crud")
+    public String listSutik(Model model) {
+        List<Suti> sutik = sutiRepo.findAll();
+        model.addAttribute("sutik", sutik);
+        return "crud";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/crud/delete/{id}")
+    public String deleteSuti(@PathVariable Long id) {
+        sutiRepo.deleteById(id);
+        return "redirect:/crud";
+    }
 }
