@@ -36,21 +36,23 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+
                 .authorizeHttpRequests((requests) -> requests
-                        // Statikus fájlok
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/img/**", "/fonts/**", "/sass/**").permitAll()
 
-                        // PUBLIKUS oldalak (Vendég is látja a leírásod alapján: Diagram, CRUD, REST is!)
+                        // Publikus oldalak
                         .requestMatchers("/", "/index", "/adatbazis", "/contact", "/login", "/register", "/regisztral_feldolgoz").permitAll()
-                        .requestMatchers("/diagram", "/crud", "/rest").permitAll() // Ezeket kérted, hogy a vendég is lássa
+                        .requestMatchers("/diagram", "/crud", "/rest").permitAll()
 
-                        // Védett oldalak (Csak bejelentkezett felhasználóknak)
+
+                        .requestMatchers("/api/**").permitAll()
+
                         .requestMatchers("/messages/**").hasAnyRole("USER", "ADMIN")
-
-                        // Admin oldalak
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Minden más hitelesítést igényel
+                        
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
