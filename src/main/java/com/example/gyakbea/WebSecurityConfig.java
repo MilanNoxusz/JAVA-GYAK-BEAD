@@ -52,7 +52,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/messages/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        
+
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
