@@ -104,7 +104,7 @@ public class AuthController {
         return "redirect:/crud";
     }
 
-    // --- KAPCSOLAT (ITT A VÁLTOZÁS) ---
+    // --- KAPCSOLAT ---
     @GetMapping("/contact")
     public String showContactForm(Model model) {
         Message message = new Message();
@@ -143,19 +143,16 @@ public class AuthController {
     @GetMapping("/messages")
     public String showMessages(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Ellenőrizzük, hogy be van-e lépve
         if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails)) {
             return "redirect:/login";
         }
-        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        String currentEmail = userDetails.getUsername();
-        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        List<Message> messages;
-        if (isAdmin) {
-            messages = messageRepository.findAllByOrderByCreatedAtDesc();
-        } else {
-            messages = messageRepository.findByEmailOrderByCreatedAtDesc(currentEmail);
-        }
+
+        // Mindenkiaz látja az összes üzenetet lidőrendben.
+        List<Message> messages = messageRepository.findAllByOrderByCreatedAtDesc();
+
         model.addAttribute("messages", messages);
         return "messages";
     }
